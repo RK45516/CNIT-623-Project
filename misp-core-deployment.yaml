@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: misp-core
+  labels:
+    io.kompose.service: misp-core
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: misp-core
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: misp-core
+    spec:
+      containers:
+        - name: misp-core
+          image: ghcr.io/misp/misp-docker/misp-core:latest
+          ports:
+            - containerPort: 80
+              protocol: TCP
+            - containerPort: 443
+              protocol: TCP
+          env:
+            - name: MYSQL_DATABASE
+              value: misp
+            - name: MYSQL_HOST
+              value: "10.56.3.190"
+            - name: MYSQL_PASSWORD
+              value: Kinnera98#
+            - name: MYSQL_PORT
+              value: "3306"
+            - name: MYSQL_USER
+              value: misp_user
+            - name: ADMIN_EMAIL
+              value: rkinnera@purdue.edu
+            - name: ADMIN_PASSWORD
+              value: Kinnera98#
+            - name: BASE_URL
+              value: https://129.114.26.122:443
+            - name: PHP_MEMORY_LIMIT
+              value: 2048M
+            - name: PHP_MAX_EXECUTION_TIME
+              value: "300"
+          livenessProbe:
+            httpGet:
+              path: /users/heartbeat
+              port: 443
+              scheme: HTTPS
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 2
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "0.5"
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+          volumeMounts:
+            - mountPath: /var/www/MISP/app/Config
+              name: misp-core-claim0
+            - mountPath: /var/www/MISP/app/tmp/logs
+              name: misp-core-claim1
+            - mountPath: /var/www/MISP/app/files
+              name: misp-core-claim2
+            - mountPath: /var/www/MISP/.gnupg
+              name: misp-core-claim4
+            - mountPath: /etc/nginx/certs
+              name: misp-core-claim3
+            - mountPath: /mnt/zeek-logs
+              name: shared-logs
+      restartPolicy: Always
+      volumes:
+        - name: misp-core-claim0
+          persistentVolumeClaim:
+            claimName: misp-core-claim0
+        - name: misp-core-claim1
+          persistentVolumeClaim:
+            claimName: misp-core-claim1
+        - name: misp-core-claim2
+          persistentVolumeClaim:
+            claimName: misp-core-claim2
+        - name: misp-core-claim4
+          persistentVolumeClaim:
+            claimName: misp-core-claim4
+        - name: misp-core-claim3
+          persistentVolumeClaim:
+            claimName: misp-core-claim3
+        - name: shared-logs
+          persistentVolumeClaim:
+            claimName: zeek-claim0
+
