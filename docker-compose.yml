@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  zeek:
+    image: zeek/zeek:latest
+    container_name: zeek
+    command: ["zeek", "-i", "eth0"]
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    environment:
+      - TZ=UTC  # Set timezone
+    volumes:
+      - ./pcap:/pcap  # Directory to store PCAP files
+      - ./logs:/usr/local/zeek/logs  # Directory to store Zeek logs
+    ports:
+      - "47760:47760"  # Port for Zeek communication (if needed)

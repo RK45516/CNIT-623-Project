@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zeek
+  labels:
+    app: zeek
+    environment: production
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zeek
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: zeek
+    spec:
+      containers:
+        - name: zeek
+          image: zeek/zeek:latest
+          args:
+            - zeek
+            - -i
+            - eth0
+            - -C
+          env:
+            - name: TZ
+              value: UTC
+          ports:
+            - containerPort: 47760
+              protocol: TCP
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - NET_RAW
+          volumeMounts:
+            - mountPath: /pcap
+              name: zeek-claim0
+            - mountPath: /usr/local/zeek/logs
+              name: zeek-claim1
+            - mountPath: /usr/local/zeek/logs
+              name: shared-logs
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "0.5"
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+      volumes:
+        - name: zeek-claim0
+          persistentVolumeClaim:
+            claimName: zeek-claim0
+        - name: zeek-claim1
+          persistentVolumeClaim:
+            claimName: zeek-claim1
+        - name: shared-logs
+          persistentVolumeClaim:
+            claimName: zeek-claim0
+      restartPolicy: Always
