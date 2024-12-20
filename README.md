@@ -34,7 +34,7 @@ This project integrates MISP (Malware Information Sharing Platform) and Zeek (fo
   Apply the Persistent Volume Claims:
     kubectl apply -f misp-core-claim0-persistentvolumeclaim.yaml
     kubectl apply -f misp-core-claim1-persistentvolumeclaim.yaml
-  # Apply other PVCs as needed
+   Apply other PVCs as needed
 
 4. Deploy MISP Core:
 
